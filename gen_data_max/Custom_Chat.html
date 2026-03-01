@@ -1,0 +1,23 @@
+{{ block title }}
+
+    Discuss Statement with Partner
+
+{{ endblock }}
+
+{{ block content }}
+
+<p> Item to discuss: {{ statements }} </p>
+
+
+{{ chat nickname=nickname channel=channel}}
+
+<style>
+    .otree-btn-next {
+        background-color: #4CAF50; /* Example: green */
+        color: white;
+    }
+</style>
+{{ next_button }}
+
+
+{{ endblock }}
