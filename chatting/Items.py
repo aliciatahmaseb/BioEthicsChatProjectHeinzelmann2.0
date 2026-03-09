@@ -1,0 +1,1 @@
+STATEMENTS_CHAT = ["A", "B"]

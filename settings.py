@@ -6,7 +6,8 @@ SESSION_CONFIGS = [
     #     app_sequence=['public_goods'],
     #     num_demo_participants=3,
     # ),
-    dict(name = "BioEthics_1", app_sequence = ["gen_data_min"], num_demo_participants = 4)
+    dict(name="BioEthics_max", app_sequence=["bioethics_max", "chatting", "reflection"], num_demo_participants=4)
+
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
@@ -35,4 +36,4 @@ ADMIN_PASSWORD = environ.get('OTREE_ADMIN_PASSWORD')
 
 DEMO_PAGE_INTRO_HTML = """ """
 
-SECRET_KEY = '2402039708123'
+SECRET_KEY = '2582556892305'
