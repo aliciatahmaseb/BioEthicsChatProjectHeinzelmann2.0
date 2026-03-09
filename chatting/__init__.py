@@ -1,16 +1,13 @@
 from otree.api import *
 import numpy as np
 from .matching import ilp_schedule
-from bioethics_max import C as ethics
+from bioethics_min import C as ethics
 from .ChatWaitPage import ChatWaitPage
 from .ChatPage import Chat
 
-# !!! COM: this is if we assume all statements are used. If not, what is in our case, we need to redefine statements in C and fill it with the correct statements we want to discuss
-# statements = ethics.STATEMENTS.copy()
-
 
 doc = """
-This is for the pairing based on collected data in the bioethics_max app, and construct the chats for all rounds 
+This is for the pairing based on collected data in the bioethics_min app, and construct the chats for all rounds 
 """
 
 
@@ -19,7 +16,8 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     # !!! COM: this must be adapted according to the statements we make use of
     # !!! COM: we say that statements x, y and z have to be discussed. Then the NUM_ROUNDS = 3
-    STATEMENTS_CHAT = ["A", "B"]
+    STATEMENTS_CHAT = ["Die DNA von Verdächtigen mit DNA zu vergleichen, die an einem Tatort gefunden wurde, ist...",
+                  "Von selbsterklärten Erben Gentests als Beweis der Abstammung zu verlangen ist ..."]
     NUM_ROUNDS = len(STATEMENTS_CHAT)
 
 
@@ -39,21 +37,21 @@ class Player(BasePlayer):
 
 def compute_pairing(player_values: np.ndarray):
 
-    data_max = player_values
+    data_min = player_values
 
     print("Input Data:")
-    print(data_max)
+    print(data_min)
 
-    schedule = ilp_schedule(data_max)
-    my_matrix_max = schedule
+    schedule = ilp_schedule(data_min)
+    my_matrix_min = schedule
 
-    print(my_matrix_max)
+    print(my_matrix_min)
 
     print("\nGenerated Schedule:")
     for i, round in enumerate(schedule):
         print(f"Round {i + 1}:")
         print(round)
-    return my_matrix_max #will be stored for later use
+    return my_matrix_min #will be stored for later use
 
 
 
@@ -78,22 +76,22 @@ class StartWaitPage(WaitPage):
         # np.vstack stacks the arrays into a 2D array (i.e., matrix)
 
         # we stored the ratings of the players and now call them back via the key "valuation":
-        data_maximisation = np.vstack([
+        data_minimisation = np.vstack([
             p.participant.vars["valuation"]
             for p in players
         ])
 
-        print("Data Matrix:", data_maximisation)
+        print("Data Matrix:", data_minimisation)
 
         #compute pairs (schedule) - what is returned when calling compute_pairing
 
-        my_matrix_max = compute_pairing(data_maximisation)
+        my_matrix_min = compute_pairing(data_minimisation)
 
-        print("Computed Schedule:", my_matrix_max)
+        print("Computed Schedule:", my_matrix_min)
 
         # need to store the matrix!! - this is a list[list[tuple]]
 
-        subsession.session.vars["my_matrix_max"] = my_matrix_max
+        subsession.session.vars["my_matrix_min"] = my_matrix_min
 
 
 class Results(Page):

@@ -12,7 +12,7 @@ class ChatWaitPage(WaitPage):
 
         round_index = players[0].round_number - 1
 
-        pair_matrix_round = players[0].session.vars["my_matrix_max"][round_index]
+        pair_matrix_round = players[0].session.vars["my_matrix_min"][round_index]
 
         groups = []
         for pair in pair_matrix_round:

@@ -2,10 +2,10 @@ import itertools
 import numpy as np
 import pulp
 
-#this is a function to max, I can create one to minimise too
-def ilp_schedule(data, maximize=True):
+# set to false i.o. for later to use minimisation
+def ilp_schedule(data, maximize=False):
     """
-    ILP solver for a maximum-weight multi-round pairing schedule.
+    ILP solver for a minimum-weight multi-round pairing schedule.
 
     Parameters
     ----------
@@ -47,13 +47,16 @@ def ilp_schedule(data, maximize=True):
                 weights[i,j,r] = abs(data[i,r] - data[j,r])
 
     ### Create Integer Linear Programming model ###
-    # need to set maximise = False if want to have pulp.LpMinimize
+
+    # set maximise = False i.o.t.  have pulp.LpMinimize
     optimization_operation = pulp.LpMaximize if maximize else pulp.LpMinimize
+
     # call the model DiscussionScheduling and we pass optimization_operation
     # create optimisation problem (does nothing yet, just define it)
     model = pulp.LpProblem("DiscussionScheduling", optimization_operation)
 
     ### Decision variables ###
+
     # pulp.LpVariable(name, lowBound, upBound, category)
     # for every possible pair, for every possible round, create one binary variable (remains empty!)
     x = {
@@ -63,6 +66,7 @@ def ilp_schedule(data, maximize=True):
     }
 
     ### Objective: maximize total weight across all rounds ###
+
     # add to the problem the objective
     # sum of the product between the weight and the decision variables for each pair in each round
     model += pulp.lpSum(weights[i, j, r] * x[(i, j, r)] for (i, j) in pairs for r in range(R))
@@ -81,6 +85,7 @@ def ilp_schedule(data, maximize=True):
         model += pulp.lpSum(x[(i, j, r)] for r in range(R)) <= 1
 
     ### Solve the ILP ###
+
     # what happens: sent the objective and constraints to the solver
     # solver chooses values for all LpVariables --> now our x will get values (for i,j and r)
     # CBC --> default open-source solver PuLP uses
@@ -88,6 +93,7 @@ def ilp_schedule(data, maximize=True):
     model.solve(pulp.PULP_CBC_CMD(msg=False))
 
     ### Extract schedule ###
+
     # question : is this creating an empty list where that we have more colons not just one dimension?
     # does it allow us to have as elements lists (so lists in lists?)
     # create a list for each round so schedule is a list of lists (bcs we have multiple pairs per round)

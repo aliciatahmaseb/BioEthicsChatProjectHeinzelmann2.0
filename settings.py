@@ -6,7 +6,7 @@ SESSION_CONFIGS = [
     #     app_sequence=['public_goods'],
     #     num_demo_participants=3,
     # ),
-    dict(name="BioEthics_max", app_sequence=["bioethics_max", "chatting", "reflection"], num_demo_participants=4)
+    dict(name="BioEthics_min", app_sequence=["bioethics_min", "chatting", "reflection"], num_demo_participants=4)
 
 ]
 
@@ -36,4 +36,4 @@ ADMIN_PASSWORD = environ.get('OTREE_ADMIN_PASSWORD')
 
 DEMO_PAGE_INTRO_HTML = """ """
 
-SECRET_KEY = '2582556892305'
+SECRET_KEY = '2482556892305'

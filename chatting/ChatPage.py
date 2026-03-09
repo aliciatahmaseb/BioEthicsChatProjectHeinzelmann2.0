@@ -1,9 +1,6 @@
 from otree.api import *
 from .Items import STATEMENTS_CHAT
 
-#PROBLEM HERE:
-# I do not choose the statement that I want to have discussed
-# I just take the one out of STATEMENTS with the index rounds_number - 1
 
 class Chat(Page):
     template_name = "Custom_Chat.html"
@@ -17,7 +14,7 @@ class Chat(Page):
         statement = STATEMENTS_CHAT[round_index]
 
         # get schedule for this round
-        pair_matrix_round = player.session.vars["my_matrix_max"][round_index]
+        pair_matrix_round = player.session.vars["my_matrix_min"][round_index]
 
         # find this player's pair
         pair = next(
