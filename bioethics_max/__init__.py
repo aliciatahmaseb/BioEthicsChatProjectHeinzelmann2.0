@@ -11,7 +11,7 @@ this is to gather the valuation for the statements before the chat
 class C(BaseConstants):
     NAME_IN_URL = 'gen_data_max'
     PLAYERS_PER_GROUP = None
-    TESTROUND = ["Probe"]
+    TESTROUND = "Probe"
     # !!! COM: should be adapted with the correct statements
     STATEMENTS = ["A", "B", "C"]
     # !!! COM: so i get the statement valuations on different pages! - this will be 18 if we make it ready for our experiment
@@ -42,12 +42,12 @@ class Player(BasePlayer):
     # construct a vector across rounds
     def get_ratings_array_pre(self):
         return np.array([
-            self.rating_pre for p in self.in_all_rounds()],
+            p.rating_pre for p in self.in_all_rounds()],
             dtype =int)
 
     def get_confidence_array(self):
         return np.array([
-            self.confidence for p in self.in_all_rounds()],
+            p.confidence for p in self.in_all_rounds()],
             dtype =int)
 
 
@@ -71,6 +71,32 @@ class TestPage(Page):
             testing=C.TESTROUND[player.round_number - 1]
         )
 
+class TestWaitPage(WaitPage):
+    wait_for_all_groups = True
+    def is_displayed(player):
+        # only shown in round 1
+        return player.round_number == 1
+    @staticmethod
+    def after_all_players_arrive(subsession):
+        import random
+        testplayers = subsession.get_players()
+
+        # to make sure the pairing is random
+        random.shuffle(testplayers)
+
+        # matrix in which the test pairs are stored
+        test_matrix = []
+
+        # fill in the matrix with pairs
+        for i in range(0, len(testplayers), 2):
+            pair = [testplayers[i], testplayers[i+1]]
+            test_matrix.append(pair)
+
+        # as they are no longer players, but now groups of two, need to use subsession
+        # what does set_group_matrix stand for again
+        subsession.set_group_matrix(test_matrix)
+
+class TestChat(Page):
     def is_displayed(player):
         # only shown in round 1
         return player.round_number == 1
@@ -103,12 +129,6 @@ class confidence(Page):
             rating_pre=player.rating_pre
         )
 
-class Start(WaitPage):
-    wait_for_all_groups = True
-    def is_displayed(player):
-        # only shown in round 1
-        return player.round_number == 1
-
 class StoreRatings(WaitPage):
     wait_for_all_groups = True
     # store ratings globally per participant as participant.vars persists across apps
@@ -123,11 +143,18 @@ class StoreRatings(WaitPage):
             # valuation is the key for the dictionary
             p.participant.vars['valuation'] = p.get_ratings_array_pre()
 
+class Start(WaitPage):
+    wait_for_all_groups = True
+    def is_displayed(player):
+        # only shown in round 1
+        return player.round_number == 1
 
-page_sequence = [StartIntro,
-                 Instructions,
-                 TestPage,
-                 Start,
+page_sequence = [#StartIntro,
+                 #Instructions,
+                 #TestPage,
+                 #TestWaitPage,
+                 #TestChat,
+                 #Start,
                  PreChatRating,
                  confidence,
                  StoreRatings
