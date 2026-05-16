@@ -6,7 +6,7 @@ SESSION_CONFIGS = [
     #     app_sequence=['public_goods'],
     #     num_demo_participants=3,
     # ),
-    dict(name="BioEthics_min", app_sequence=["bioethics_min", "chatting", "reflection"], num_demo_participants=4)
+    dict(name="BioEthics_min", app_sequence=["bioethics_min", "chatting", "reflection" ], num_demo_participants=6)
 
 ]
 
