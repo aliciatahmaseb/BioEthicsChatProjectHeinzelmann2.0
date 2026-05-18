@@ -1,0 +1,23 @@
+{{ block title }}
+
+    Besprechen Sie die Aussage mit Ihrem Partner.
+
+{{ endblock }}
+
+{{ block content }}
+
+<p> Zu besprechender Aussage : {{ statement }} </p>
+
+
+{{ chat nickname=nickname channel=channel}}
+
+<style>
+    .otree-btn-next {
+        background-color: #4CAF50; /* Example: green */
+        color: white;
+    }
+</style>
+{{ next_button }}
+{{ include_sibling 'Timer.html' }}
+
+{{ endblock }}

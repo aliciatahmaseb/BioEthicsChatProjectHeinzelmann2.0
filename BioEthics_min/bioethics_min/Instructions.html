@@ -1,0 +1,124 @@
+{{ block title }}
+    Instructions
+{{ endblock }}
+
+{{ block content }}
+
+<p>Das folgende Experiment besteht aus drei Teilen</p>
+
+<p>
+<strong>Im <em>ersten</em> und <em>dritten</em>  Teil bitten wir Sie um Ihre ethischen Urteile zu verschiedenen Themen.</strong>
+</p>
+
+<p><em>Beispiel:</em></p>
+
+<style>
+  .custom-range {
+    -webkit-appearance: none; appearance: none;
+    width: 500px; height: 6px;
+    background: #bbb;
+    border-radius: 4px; outline: none; cursor: pointer;
+  }
+  .custom-range.hidden-thumb::-webkit-slider-thumb { display: none; width: 0; }
+  .custom-range.hidden-thumb::-moz-range-thumb    { display: none; width: 0; }
+  .custom-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer;
+  }
+  .custom-range::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer; border: none;
+  }
+
+  .conf-range {
+    -webkit-appearance: none; appearance: none;
+    width: 500px; height: 6px;
+    background: #bbb;
+    border-radius: 4px; outline: none; cursor: pointer;
+  }
+  .conf-range.hidden-thumb::-webkit-slider-thumb { display: none; width: 0; }
+  .conf-range.hidden-thumb::-moz-range-thumb    { display: none; width: 0; }
+  .conf-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer;
+  }
+  .conf-range::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer; border: none;
+  }
+</style>
+<p>Es gibt keine richtigen oder falschen Antworten.</p>
+
+<p>Sich aus Spaß gegenseitig mit Essen in der Mensa zu bewerfen ist…</p>
+
+<div style="width:500px; display:flex; justify-content:space-between; font-size:12px;">
+  <span>moralisch schlecht</span>
+  <span>neutral</span>
+  <span>moralisch gut</span>
+</div>
+<input type="range"
+       id="rating_demo"
+       class="custom-range hidden-thumb"
+       min="0" max="100" step="1" value="50">
+<p id="rating_hint" style="font-size:12px; color:gray; font-style:italic;">
+  Klicken Sie auf die Position auf dem Balken an, der Ihre Meinung am besten abbildet.
+</p>
+
+<br>
+
+<p>Anschließend möchten wir gerne wissen, wie sicher Sie sich in Ihrer Antwort sind:</p>
+
+<div style="width:500px; display:flex; justify-content:space-between; font-size:12px;">
+  <span>0</span>
+  <span>100</span>
+</div>
+<input type="range"
+       id="conf_demo"
+       class="conf-range hidden-thumb"
+       min="0" max="100" step="1" value="50">
+<p id="conf_hint" style="font-size:12px; color:gray; font-style:italic;">
+  Wie sicher sind Sie sich bei Ihrer Einschätzung?
+</p>
+
+<script>
+  var ratingSet = false, confSet = false;
+
+  function activateSlider(sliderId, hintId, flag) {
+    document.getElementById(sliderId).classList.remove('hidden-thumb');
+    document.getElementById(hintId).textContent = '';
+    if (flag === 'rating') ratingSet = true;
+    if (flag === 'conf')   confSet   = true;
+    checkSubmit();
+  }
+
+  function checkSubmit() {
+    if (ratingSet && confSet) {
+      document.getElementById('submit_note').textContent = '';
+    }
+  }
+
+  ['mousedown', 'touchstart'].forEach(function(evt) {
+    document.getElementById('rating_demo').addEventListener(evt, function() {
+      if (!ratingSet) activateSlider('rating_demo', 'rating_hint', 'rating');
+    });
+    document.getElementById('conf_demo').addEventListener(evt, function() {
+      if (!confSet) activateSlider('conf_demo', 'conf_hint', 'conf');
+    });
+  });
+</script>
+
+<p>
+    <strong>Im <em>zweiten</em> Teil werden Sie mehrmals zufällig und anonym mit einer anderen Person hier im Raum chatten. Sie werden nicht zweimal mit derselben Person chatten.</strong>
+</p>
+
+<p> Zusätzlich werden wir Ihnen demografische sowie allgemeine Fragen zu Ihrem Medienkonsum und Ihrem sozialen Umfeld stellen.<p/>
+
+<p>Sie haben nun Gelegenheit, die Eingaben und das Chatten auszuprobieren. Wenn Sie Fragen haben, stellen Sie sie bitte jetzt oder im Anschluss an die kurze Testphase, bevor das Experiment beginnt.
+</p>
+
+{{ formfields }}
+{{ next_button }}
+
+{{ endblock }}

@@ -1,0 +1,144 @@
+import itertools
+import numpy as np
+import pulp
+
+# set to false i.o. for later to use minimisation
+# data is the matrix with values being passed on, if I want to get the data for player 1 for item 8, I can call is data[1,8]
+# we pass data_min
+
+def ilp_schedule(data, maximize=False):
+    """
+    ILP solver for a minimum-weight multi-round pairing schedule.
+
+    INFO:
+    * r stands for the round (the indicator of the item/statement)
+    * data[i,r] = the rating that player i gave to statement r
+    * R = data.shape[1] -->  number of columns in matrix (i.e., the total number of statements)
+    * data.shape[0] --> number of rows (i.e., number of players)
+
+    Parameters
+    ----------
+    data : np.array
+        The response data by the participants, which is used to calculate
+        the weights. Expected shape is (NUMBER_OF_PLAYERS, NUMBER_OF_ROUNDS).
+    maximize: bool
+        Whether ot not we are maximizing or minimizing the weights. Set to
+        True to have different opinions scheduled together.
+
+    Returns
+    -------
+    schedule : list[list[tuple]]
+        The returned list contains an entry per round. Each entry is a list in
+        itself that contains tuples for all pairs. - for each round we have a list of pairs
+    """
+
+    ### Assert that an even number of participants is given.###
+    # .shape[0] gives us the number of rows in data --> gives us the number of players
+    if data.shape[0] % 2 == 1:
+        raise ValueError("An even number of participants is required")
+
+    # to make sure that we have enough players N for respecting the conditions with the number of statements S
+    # we need at least 2 players more than the number of statements
+    S = data.shape[1]
+    N = data.shape[0]
+    if N < S + 1:
+        raise ValueError(f"Need at least {S + 1} players for {S} statements, but only have {N}")
+
+    # .shape[1] gives us the number of columns --> this is our number of rounds
+    R = data.shape[1]
+
+    ### Generate the set of potential player pairs ###
+    # by using range, we create integers from 0 till n-1 (so if data.shape[0] = 4 p = [0,1,2,3])
+    P = list(range(data.shape[0]))
+    # get all possible pairs (bcs of 2) without repeating pairs
+    pairs = [(i, j) for i, j in itertools.combinations(P, 2)]
+
+    ### Create the weights ###
+    # create a numpy array which is some sort of matrix --> we get a multidimensional array. The shape is (len(p), len(p), R)
+    # p is the number of participants so if this was 10, we get as shape, 10 x 10 x number of items R -- our (x,y,z) matrix -- which has double pairs
+    weights = np.zeros(shape=(len(P), len(P), R))
+    for i in range(len(P)):
+        for j in range(len(P)):
+            # our weights are important for measuring the pairs, but the data[i,r] is actually important
+            for r in range(R):
+                weights[i,j,r] = abs(data[i,r] - data[j,r])
+
+    ### Create Integer Linear Programming model ###
+
+    # set maximise = False i.o.t.  have pulp.LpMinimize
+    optimization_operation = pulp.LpMaximize if maximize else pulp.LpMinimize
+
+    # call the model DiscussionScheduling and we pass optimization_operation
+    # create optimisation problem (does nothing yet, just define it)
+    model = pulp.LpProblem("DiscussionScheduling", optimization_operation)
+
+    ### Decision variables ###
+
+    # pulp.LpVariable(name, lowBound, upBound, category)
+    # for every possible pair, for every possible round, create one binary variable (remains empty!)
+    x = {
+        (i, j, r): pulp.LpVariable(f"x_{i}_{j}_{r}", 0, 1, pulp.LpBinary)
+        for (i, j) in pairs
+        for r in range(R)
+    }
+
+    ### Objective: maximize total weight across all rounds ###
+
+    # add to the problem the objective
+    # sum of the product between the weight and the decision variables for each pair in each round
+    model += pulp.lpSum(weights[i, j, r] * x[(i, j, r)] for (i, j) in pairs for r in range(R))
+
+    ### Constraint 1: each player plays at most once per round ###
+    for r in range(R):
+        for i in P:
+            model += pulp.lpSum(
+                x[(min(i, j), max(i, j), r)]
+                for j in P if j != i
+                if (min(i, j), max(i, j)) in pairs
+            ) == 1
+
+    ### Constraint 2: each pair can occur at most once ###
+    for (i, j) in pairs:
+        model += pulp.lpSum(x[(i, j, r)] for r in range(R)) <= 1
+
+    ### Solve the ILP ###
+
+    # what happens: sent the objective and constraints to the solver
+    # solver chooses values for all LpVariables --> now our x will get values (for i,j and r)
+    # CBC --> default open-source solver PuLP uses
+    # msg = false --> suppresses solver output (does not print solver message)
+    model.solve(pulp.PULP_CBC_CMD(msg=False))
+
+    ### Extract schedule ###
+
+    # question : is this creating an empty list where that we have more colons not just one dimension?
+    # does it allow us to have as elements lists (so lists in lists?)
+    # create a list for each round so schedule is a list of lists (bcs we have multiple pairs per round)
+
+    # this list consists of lists of pairs where we do not store the values of the players in each pair, but the players' indices (ID)
+    schedule = [[] for _ in range(R)]
+
+    # mirror the schedule matrix with the actual values of the players in each pair
+    values = [[] for _ in range(R)]
+
+
+    # x is our LpVariable, if it 0, the pair is not scheduled, if it is 1, it is scheduled
+    # x.items --> returns ((i,j,r), LpVariable) --> (i, j, r), var --> (i, j, r) is the key, and var is the LpVariable object associated with key (either 1 or 0)
+    # var (being 0 or 1) only becomes a value after model.solve
+    # if the var.value is 1, the pair will we attached to the schedule in that round (so if solver chose x(i,j,r) = 1, then the pair (i,j) is scheduled in round r, and appended
+    for (i, j, r), var in x.items():
+        # we only want to know the values of the actual pairs (so values[r] is put here)
+        if var.value() > 0.5:
+            schedule[r].append((i, j))
+            # store their values via data[player_ID,item_ID]
+            values[r].append((data[i,r], data[j,r]))
+
+    #EXAMPLE:
+    # for r = 1:
+    # schedule --> [(1,0), (2,3)]
+    # Values[1] --> [(data[1,1], data[0,1]), (data[2,1], data[3,1])]
+
+# return the matrix schedule which will be saved, in this code, as schedule
+
+    return schedule, values
+

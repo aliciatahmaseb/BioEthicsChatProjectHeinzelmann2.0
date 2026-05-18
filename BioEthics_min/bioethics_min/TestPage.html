@@ -1,0 +1,152 @@
+{{ block title }}
+Testphase
+{{ endblock }}
+
+{{ block content }}
+
+<!-- STATEMENT DISPLAY -->
+    <i>Bitte geben Sie einen Wert</i>
+    <br>
+    <br>
+    <strong>{{ testing }}</strong>
+    <br>
+    <br>
+
+<!-- CSS STYLES
+    two sliders: .custom-range and .conf-range for the rating and confidence slider
+    start with the draggable circle which is hidden via the .hidden-thumb class -->
+<!-- Slider label bar -->
+
+<style>
+  .custom-range {
+    -webkit-appearance: none; appearance: none;
+    width: 500px; height: 6px;
+    background: #bbb;
+    border-radius: 4px; outline: none; cursor: pointer;
+  }
+  .custom-range.hidden-thumb::-webkit-slider-thumb { display: none; width: 0; }
+  .custom-range.hidden-thumb::-moz-range-thumb    { display: none; width: 0; }
+  .custom-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer;
+  }
+  .custom-range::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer; border: none;
+  }
+
+  .conf-range {
+    -webkit-appearance: none; appearance: none;
+    width: 500px; height: 6px;
+    background: #bbb;
+    border-radius: 4px; outline: none; cursor: pointer;
+  }
+  .conf-range.hidden-thumb::-webkit-slider-thumb { display: none; width: 0; }
+  .conf-range.hidden-thumb::-moz-range-thumb    { display: none; width: 0; }
+  .conf-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer;
+  }
+  .conf-range::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer; border: none;
+  }
+</style>
+
+
+<!-- RATING and CONFIDENCE SLIDER   -->
+<!-- RATING -->
+
+<p><em>Bitte klicken Sie die Position auf dem Balken an, der Ihre Meinung am besten abbildet. Sie können diese durch Verschieben ändern. Bestätigen Sie dann Ihre Meinung mit „OK".</em></p>
+<div style="width:500px; display:flex; justify-content:space-between; font-size:12px;">
+  <span>moralisch schlecht</span>
+  <span>neutral</span>
+  <span>moralisch gut</span>
+</div>
+<input type="range" id="test_rating_display" name="test_rating"
+       class="custom-range hidden-thumb"
+       min="0" max="100" step="1" value="50">
+<p id="rating_hint" style="font-size:12px; color:gray; font-style:italic;">
+  Klicken Sie auf die Skala, um Ihre Bewertung zu setzen
+</p>
+
+<br>
+
+<!-- CONFIDENCE -->
+
+<p><em>Wie sicher sind Sie sich bei Ihrer Einschätzung?</em></p>
+<div style="width:500px; display:flex; justify-content:space-between; font-size:12px;">
+  <span>0</span>
+  <span>100</span>
+</div>
+<input type="range" id="test_confidence_display" name="test_confidence"
+       class="conf-range hidden-thumb"
+       min="0" max="100" step="1" value="50">
+<p id="conf_hint" style="font-size:12px; color:gray; font-style:italic;">
+  Klicken Sie auf die Skala, um Ihre Sicherheit anzugeben
+</p>
+
+<br>
+
+<!-- SUBMIT BUTTON -->
+
+<button id="submit_btn" style="background-color:#ccc; color:white; border:none;
+        padding:8px 24px; font-size:15px; cursor:not-allowed; border-radius:4px;"
+        type="submit" disabled>OK</button>
+<span id="submit_note" style="font-size:12px; color:gray; margin-left:12px;">
+  Bitte beide Skalen ausfüllen
+</span>
+
+<!-- TIMER -->
+
+{{ include_sibling 'Timer1.html' }}
+
+<!-- JAVASCRIPT
+
+    ratingSet / confSet: flags tracking whether each slider
+    has been clicked at least once.
+
+    activateSlider(): on first click it removes hidden-thumb
+    (making the thumb visible), clears the hint text, sets
+    the flag, and calls checkSubmit().
+
+    checkSubmit(): enables and greens the OK button once
+    both flags are true.
+-->
+
+
+<script>
+  var ratingSet = false, confSet = false;
+
+  function activateSlider(sliderId, hintId, flag) {
+    document.getElementById(sliderId).classList.remove('hidden-thumb');
+    document.getElementById(hintId).textContent = '';
+    if (flag === 'rating') ratingSet = true;
+    if (flag === 'conf')   confSet   = true;
+    checkSubmit();
+  }
+
+  function checkSubmit() {
+    if (ratingSet && confSet) {
+      var btn = document.getElementById('submit_btn');
+      btn.disabled = false;
+      btn.style.backgroundColor = '#4CAF50';
+      btn.style.cursor = 'pointer';
+      document.getElementById('submit_note').textContent = '';
+    }
+  }
+
+  ['mousedown','touchstart'].forEach(function(evt) {
+    document.getElementById('test_rating_display').addEventListener(evt, function() {
+      if (!ratingSet) activateSlider('test_rating_display', 'rating_hint', 'rating');
+    });
+    document.getElementById('test_confidence_display').addEventListener(evt, function() {
+      if (!confSet) activateSlider('test_confidence_display', 'conf_hint', 'conf');
+    });
+  });
+</script>
+
+{{ endblock }}
+

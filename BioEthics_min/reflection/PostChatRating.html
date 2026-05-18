@@ -1,0 +1,198 @@
+{{ block title }}
+Bioethische Urteile
+{{ endblock }}
+
+{{ block content }}
+
+<!-- -->
+
+<!-- shows the ethical statement that needs to be rated-->
+
+
+<i>Bitte bewerten Sie die folgende Handlung:</i>
+<br><br>
+<strong>{{ statement }}</strong>
+<br><br>
+
+<!-- ============================================================
+     CSS STYLES
+     Two slider styles are defined here:
+
+     - .custom-range  → used for the rating slider
+     - .conf-range    → used for the confidence slider
+
+     Both start with the thumb (the draggable circle) hidden via
+     the .hidden-thumb class.
+     The thumb only appears once the participant clicks the slider
+     for the first time. This prevents accidental default-value submissions.
+     ============================================================ -->
+
+<style>
+  .custom-range {
+    -webkit-appearance: none; appearance: none;
+    width: 500px; height: 6px;
+    background: #bbb;
+    border-radius: 4px; outline: none; cursor: pointer;
+  }
+  .custom-range.hidden-thumb::-webkit-slider-thumb { display: none; width: 0; }
+  .custom-range.hidden-thumb::-moz-range-thumb    { display: none; width: 0; }
+  .custom-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer;
+  }
+  .custom-range::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer; border: none;
+  }
+
+  .conf-range {
+    -webkit-appearance: none; appearance: none;
+    width: 500px; height: 6px;
+    background: #bbb;
+    border-radius: 4px; outline: none; cursor: pointer;
+  }
+  .conf-range.hidden-thumb::-webkit-slider-thumb { display: none; width: 0; }
+  .conf-range.hidden-thumb::-moz-range-thumb    { display: none; width: 0; }
+  .conf-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer;
+  }
+  .conf-range::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #333; cursor: pointer; border: none;
+  }
+</style>
+
+<!-- ============================================================
+     RATING SLIDER
+
+     Captures the participant's moral judgment of the statement.
+
+     - name="rating_post" → oTree saves this value to the
+       player field called "rating_post"
+     - value="50" → internal starting position (middle), but
+       invisible to the participant until they click
+     - The label row above shows the three anchor labels
+     - The hint text below disappears once the slider is used
+     ============================================================ -->
+
+<p><em>Bitte klicken Sie die Position auf dem Balken an, der Ihre Meinung am besten abbildet. Sie können diese durch Verschieben ändern. Bestätigen Sie dann Ihre Meinung mit „OK".
+</em></p>
+<div style="width:500px; display:flex; justify-content:space-between; font-size:12px;">
+  <span>moralisch schlecht</span>
+  <span>neutral</span>
+  <span>moralisch gut</span>
+</div>
+<input type="range" id="rating_post_display" name="rating_post"
+       class="custom-range hidden-thumb"
+       min="0" max="100" step="1" value="50">
+<p id="rating_hint" style="font-size:12px; color:gray; font-style:italic;">
+  Klicken Sie auf die Skala, um Ihre Bewertung zu setzen
+</p>
+
+<br>
+
+<!-- ============================================================
+     CONFIDENCE SLIDER
+
+     Captures how certain the participant is about their rating.
+
+     - name="confidence_post" → oTree saves this to the
+       player field called "confidence_post"
+     - Works identically to the rating slider above, but with
+       a simple 0–100 numeric scale instead of text anchors
+     ============================================================ -->
+
+<p><em>Wie sicher sind Sie sich bei Ihrer Einschätzung?</em></p>
+<div style="width:500px; display:flex; justify-content:space-between; font-size:12px;">
+  <span>0</span>
+  <span>100</span>
+</div>
+<input type="range" id="confidence_post_display" name="confidence_post"
+       class="conf-range hidden-thumb"
+       min="0" max="100" step="1" value="50">
+<p id="conf_hint" style="font-size:12px; color:gray; font-style:italic;">
+  Klicken Sie auf die Skala, um Ihre Sicherheit anzugeben
+</p>
+<br>
+
+<!-- ============================================================
+     SUBMIT BUTTON
+
+     Starts disabled (gray, not clickable).
+
+     The JavaScript below enables it only once both sliders have been
+     touched. The submit_note text ("Bitte beide Skalen ausfüllen")
+     disappears at the same moment the button turns green.
+     ============================================================ -->
+
+<button id="submit_btn" style="background-color:#ccc; color:white; border:none;
+        padding:8px 24px; font-size:15px; cursor:not-allowed; border-radius:4px;"
+        type="submit" disabled>OK</button>
+
+<span id="submit_note" style="font-size:12px; color:gray; margin-left:12px;">
+  Bitte beide Skalen ausfüllen
+</span>
+
+<!-- TIMER -->
+
+{{ include_sibling 'Timer1.html' }}
+
+<!-- ============================================================
+     JAVASCRIPT — SLIDER ACTIVATION LOGIC
+
+     Controls the hidden-thumb behaviour and the submit button.
+
+     !!! ratingSet / confSet:
+     two flags that track whether each slider has been touched at least once.
+
+     activateSlider(): called on first click of a slider.
+     It:
+       1. Removes the hidden-thumb class so the thumb appears
+       2. Clears the grey hint text below the slider
+       3. Sets the matching flag to true
+       4. Calls checkSubmit() to see if both are now done
+
+
+     ============================================================ -->
+
+<script>
+  var ratingSet = false, confSet = false;
+
+  function activateSlider(sliderId, hintId, flag) {
+    document.getElementById(sliderId).classList.remove('hidden-thumb');
+    document.getElementById(hintId).textContent = '';
+    if (flag === 'rating') ratingSet = true;
+    if (flag === 'conf')   confSet   = true;
+    checkSubmit();
+  }
+
+// checkSubmit(): if both flags are true, it enables the OK button and turns it green.
+
+  function checkSubmit() {
+    if (ratingSet && confSet) {
+      var btn = document.getElementById('submit_btn');
+      btn.disabled = false;
+      btn.style.backgroundColor = '#4CAF50';
+      btn.style.cursor = 'pointer';
+      document.getElementById('submit_note').textContent = '';
+    }
+  }
+
+// The event listeners at the bottom attach activateSlider()
+  // to both mousedown (desktop) and touchstart (mobile) so
+  // the very first interaction triggers it.
+
+  ['mousedown','touchstart'].forEach(function(evt) {
+    document.getElementById('rating_post_display').addEventListener(evt, function() {
+      if (!ratingSet) activateSlider('rating_post_display', 'rating_hint', 'rating');
+    });
+    document.getElementById('confidence_post_display').addEventListener(evt, function() {
+      if (!confSet) activateSlider('confidence_post_display', 'conf_hint', 'conf');
+    });
+  });
+</script>
+
+{{ endblock }}

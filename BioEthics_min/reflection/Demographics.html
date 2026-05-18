@@ -1,0 +1,62 @@
+{{ block title }}
+    Demographics
+{{ endblock }}
+{{ block content }}
+
+<!-- AGE -->
+{{ formfield 'age' }}
+
+<br>
+
+<!-- GENDER — show text box only when "Sonstiges" is selected -->
+{{ formfield 'gender' }}
+
+<!-- a box is created, where we ask for other in case that the person
+indicates other. If he/she does not click on alternative, this will not appear (same for Ethnicity)-->
+<div id="gender_other_box" style="display:none; margin-left: 24px;">
+    {{ formfield 'gender_other' }}
+</div>
+
+<br>
+
+<!-- ETHNICITY — show text box only when "Andere" is selected -->
+{{ formfield 'Ethnicity' }}
+
+<div id="ethnicity_other_box" style="display:none; margin-left: 24px;">
+    {{ formfield 'Ethnicity_other' }}
+</div>
+
+<br>
+
+<!-- POLITICAL ORIENTATION -->
+{{ formfield 'Political_Orientation' }}
+
+<br>
+
+<!-- RELIGION -->
+{{ formfield 'Religion' }}
+
+<br>
+
+<!-- this is the JAVASCRIPT code which the player sees -->
+<script>
+  /* --- GENDER: show/hide on "Sonstiges" --- */
+  document.querySelectorAll('input[name="gender"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var box = document.getElementById('gender_other_box');
+      box.style.display = (this.value === 'Sonstiges') ? 'block' : 'none';
+    });
+  });
+
+  /* --- ETHNICITY: show/hide on "Andere" --- */
+  document.querySelectorAll('input[name="Ethnicity"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var box = document.getElementById('ethnicity_other_box');
+      box.style.display = (this.value === 'Andere') ? 'block' : 'none';
+    });
+  });
+</script>
+
+<button type="submit">Weiter</button>
+
+{{ endblock }}

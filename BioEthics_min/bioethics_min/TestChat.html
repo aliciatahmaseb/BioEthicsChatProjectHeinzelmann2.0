@@ -1,0 +1,16 @@
+{{ block title }}
+    Test Chat
+{{ endblock }}
+{{ block content }}
+
+ {{ chat }}
+
+<style>
+        .otree-btn-next {
+            background-color: #4CAF50; /* Example: green */
+            color: white;
+        }
+    </style>
+    {{ next_button }}
+    {{ include_sibling 'Timer2.html' }}
+{{ endblock }}

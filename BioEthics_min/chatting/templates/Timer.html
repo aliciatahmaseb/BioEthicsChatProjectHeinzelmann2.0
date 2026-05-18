@@ -1,0 +1,18 @@
+<br>
+<br>
+<p id="countdown">This page will auto-submit in <span id="time">30</span> seconds.</p>
+
+<script>
+    var seconds = 300;
+    var countdownEl = document.getElementById('time');
+
+    var countdownInterval = setInterval(function() {
+        seconds--;
+        countdownEl.textContent = seconds;
+
+        if (seconds <= 0) {
+            clearInterval(countdownInterval);
+            document.forms[0].submit(); // Auto-submit the first form on the page
+        }
+    }, 1000);
+</script>
